@@ -100,13 +100,13 @@ public class MyListAdapter extends BaseAdapter {
         viewHolder.linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onClickLookMore(finalViewHolder);
+                onClickLookMore(finalViewHolder,position);
             }
         });
         viewHolder.tvItemComments.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onClickLookMore(finalViewHolder);
+                onClickLookMore(finalViewHolder,position);
             }
         });
         /*if (position >= 1) {
@@ -121,9 +121,9 @@ public class MyListAdapter extends BaseAdapter {
         return convertView;
     }
 
-    private void onClickLookMore(final ViewHolder finalViewHolder) {
+    private void onClickLookMore(final ViewHolder finalViewHolder, final int position) {
         final int startHeight = finalViewHolder.tvItemComments.getHeight();
-        if (finalViewHolder.tvItemComments.getLineCount() == 2) {
+        if (finalViewHolder.tvItemComments.getLineCount() == 2) {//从2行到多行
             MyObjectAnimator.rotationX1(finalViewHolder.ivAll);
             finalViewHolder.tvItemComments.setSingleLine(false);
             finalViewHolder.tvItemComments.post(new Runnable() {
@@ -131,7 +131,8 @@ public class MyListAdapter extends BaseAdapter {
                 public void run() {
                     int lvH = MainActivity.instance.lvComment.getHeight();
                     int endHeight = finalViewHolder.tvItemComments.getHeight();
-                    int lvEnd = endHeight - startHeight + lvH ;
+                    int dx=endHeight-startHeight;
+                    int lvEnd = dx + lvH ;
                    /* LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) MainActivity.instance.lvComment.getLayoutParams();
                     layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
                     layoutParams.height = lvEnd;
@@ -139,10 +140,18 @@ public class MyListAdapter extends BaseAdapter {
                     MainActivity.instance.lvComment.notify();*/
                     Intent intent = new Intent("myListAdapter");
                     intent.putExtra("key", lvEnd);
-                    if(getCount()!=1) {
+                    if(getCount()!=1) {//全部显示
                         intent.putExtra("keyDown", lvEnd);
-                    }else {
+                        intent.putExtra("isAll", true);
+                        if(position==0){//第一个item
+                            intent.putExtra("keyUp",
+                                    dx+MainActivity.instance.heightUp);
+                        }
+                    }else {//只用一个item
                         intent.putExtra("keyUp", lvEnd);
+                        intent.putExtra("isAll", false);
+                        intent.putExtra("keyDown", dx+MainActivity.instance.heightDown);
+                        Log.i("height", "MainActivity.instance.heightDown:" + MainActivity.instance.heightDown);
                     }
                     MainActivity.instance.sendBroadcast(intent);
                     if (finalViewHolder.tvItemComments.getLineCount() == 2) {
@@ -158,17 +167,25 @@ public class MyListAdapter extends BaseAdapter {
                 public void run() {
                     int lvH = MainActivity.instance.lvComment.getHeight();
                     int endHeight = finalViewHolder.tvItemComments.getHeight();
-                    int lvEnd = endHeight - startHeight + lvH ;
+                    int dx=endHeight-startHeight;
+                    int lvEnd = dx + lvH ;
                    /* LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) MainActivity.instance.lvComment.getLayoutParams();
                     layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
                     layoutParams.height = lvEnd;
                     MainActivity.instance.lvComment.setLayoutParams(layoutParams);
                     MainActivity.instance.lvComment.notify();*/
                     Intent intent = new Intent("myListAdapter");
-                    if(getCount()!=1) {
+                    if(getCount()!=1) {//全部显示
                         intent.putExtra("keyDown", lvEnd);
-                    }else {
+                        intent.putExtra("isAll", true);
+                        if(position==0){//第一个item
+                            intent.putExtra("keyUp",
+                                    dx+MainActivity.instance.heightUp);
+                        }
+                    }else {//只用一个item
                         intent.putExtra("keyUp", lvEnd);
+                        intent.putExtra("keyDown", dx+MainActivity.instance.heightDown);
+                        intent.putExtra("isAll", false);
                     }
                     MainActivity.instance.sendBroadcast(intent);
                     if (finalViewHolder.tvItemComments.getLineCount() == 2) {

@@ -2,7 +2,6 @@ package com.example.administrator.locationhotel.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ListView;
 
 public class MyListView extends ListView {
@@ -25,7 +24,8 @@ public class MyListView extends ListView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int expandSpec = MeasureSpec.makeMeasureSpec(Integer.MAX_VALUE >> 2,
         									MeasureSpec.AT_MOST);
-        Log.i("height", "" + expandSpec);
+        //此方法只能适应scrollview与listview在一起，而不能适应Item改变高度的listview
+        /*super.onMeasure(widthMeasureSpec, expandSpec);*/
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 }

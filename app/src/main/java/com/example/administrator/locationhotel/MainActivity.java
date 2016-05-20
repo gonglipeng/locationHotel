@@ -10,6 +10,7 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridView;
@@ -79,8 +80,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public int startLineLvHeight;
     LinearLayout.LayoutParams mLayoutParamsUp;
     LinearLayout.LayoutParams mLayoutParamsDown;
-    int heightUp;
-    int heightDown;
+    public int heightUp;    //需要adapter调用计算第一个item
+    public int heightDown;
+    private boolean isFirst=true;
 
     private void assignViews() {
         ll1 = (LinearLayout) findViewById(R.id.ll_1);
@@ -177,6 +179,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void run() {
                 startLineLvHeight = lvComment.getHeight();
+                if(isFirst){
+                    heightUp=startLineLvHeight;
+                    heightDown=startLineLvHeight*9;
+                    Log.i("heightDown", ""+heightDown);
+                    isFirst=false;
+                }
             }
         });
     }
@@ -291,7 +299,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         @Override
                         public void run() {
                             if (heightDown != 0) {
-                                lvComment.setLayoutParams(mLayoutParamsDown);
+                                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) lvComment.getLayoutParams();
+                                params.height = heightDown;
+                                params.weight = LinearLayout.LayoutParams.MATCH_PARENT;
+                                lvComment.setLayoutParams(params);
+                                Log.i("height", lvComment.getHeight() + "mLayoutParamsDown");
                             } else {
                                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) lvComment.getLayoutParams();
                                 params.height = startLineLvHeight * myListAdapter.size;
@@ -313,7 +325,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         @Override
                         public void run() {
                             if (heightUp != 0) {
-                                lvComment.setLayoutParams(mLayoutParamsUp);
+                                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) lvComment.getLayoutParams();
+                                params.height = heightUp;
+                                params.weight = LinearLayout.LayoutParams.MATCH_PARENT;
+                                lvComment.setLayoutParams(params);
+                                lvComment.setLayoutParams(params);
+                                Log.i("height", lvComment.getHeight() + "mLayoutParamsUp");
                             } else {
                                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) lvComment.getLayoutParams();
                                 params.height = startLineLvHeight / myListAdapter.size;
@@ -362,16 +379,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             if(intent.getIntExtra("keyDown", 0)!=0) {
                 heightDown = intent.getIntExtra("keyDown", 0);
-                mLayoutParamsDown = (LinearLayout.LayoutParams) MainActivity.instance.lvComment.getLayoutParams();
-                mLayoutParamsDown.width = LinearLayout.LayoutParams.MATCH_PARENT;
-                mLayoutParamsDown.height = heightDown;
-                lvComment.setLayoutParams(mLayoutParamsDown);
-            }else if(intent.getIntExtra("keyUp", 0)!=0){
+                if(intent.getBooleanExtra("isAll",false)) {
+                    mLayoutParamsDown = (LinearLayout.LayoutParams) MainActivity.instance.lvComment.getLayoutParams();
+                    mLayoutParamsDown.width = LinearLayout.LayoutParams.MATCH_PARENT;
+                    mLayoutParamsDown.height = heightDown;
+                    Log.i("height", heightDown + "heightDown");
+                    lvComment.setLayoutParams(mLayoutParamsDown);
+                }
+            }
+            if(intent.getIntExtra("keyUp", 0)!=0){
                 heightUp = intent.getIntExtra("keyUp", 0);
-                mLayoutParamsUp = (LinearLayout.LayoutParams) MainActivity.instance.lvComment.getLayoutParams();
-                mLayoutParamsUp.width = LinearLayout.LayoutParams.MATCH_PARENT;
-                mLayoutParamsUp.height = heightUp;
-                lvComment.setLayoutParams(mLayoutParamsUp);
+                if(!intent.getBooleanExtra("isAll",true)) {
+                    mLayoutParamsUp = (LinearLayout.LayoutParams) MainActivity.instance.lvComment.getLayoutParams();
+                    mLayoutParamsUp.width = LinearLayout.LayoutParams.MATCH_PARENT;
+                    mLayoutParamsUp.height = heightUp;
+                    lvComment.setLayoutParams(mLayoutParamsUp);
+                    Log.i("height", heightUp + "heightUp");
+                }
             }
         }
     }
