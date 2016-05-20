@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorTitileBackground">#4CB4F4</color>
+    <color name="textBigColor">#333333</color>
+    <color name="textContentColor">#666666</color>
+    <color name="textDownColor">#FFB933</color>
+    <color name="textWriteColor">#ffffff</color>
+    <color name="backgroundColor">#f2f2f2</color>
+    <color name="writeColor">#666666</color>
+    <color name="dianpingColor">#4cb4fb</color>
+    <color name="levelTextColor">#ffea00</color>
+    <color name="levelColor">#f46c06</color>
+    <color name="nullColor">#66000000</color>
+    <color name="imageColor">#e0e0e0</color>
+</resources>
