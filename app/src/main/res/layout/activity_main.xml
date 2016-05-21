@@ -433,7 +433,7 @@
                         android:textColor="@color/textBigColor"
                         android:textSize="14sp" />
 
-                    <TextView
+                    <TextSwitcher
                         android:id="@+id/tv_more"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.TranslateAnimation;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -13,6 +16,7 @@ import android.widget.TextView;
 import com.example.administrator.locationhotel.MainActivity;
 import com.example.administrator.locationhotel.R;
 import com.example.administrator.locationhotel.entity.CommentEntity;
+import com.example.administrator.locationhotel.utils.Const;
 import com.example.administrator.locationhotel.utils.MyObjectAnimator;
 import com.example.administrator.locationhotel.view.CircleImageView;
 
@@ -26,18 +30,11 @@ public class MyListAdapter extends BaseAdapter {
     public Activity mActivity;
     public ArrayList<CommentEntity> mList;
     public int size;
+
     public MyListAdapter(Activity activity, ArrayList<CommentEntity> list) {
         mActivity = activity;
         mList = null;
         mList = list;
-        Log.i("list", "list:" + mList.size());
-    }
-
-    public MyListAdapter(Activity activity, CommentEntity commentEntity) {
-        mActivity = activity;
-        mList = null;
-        mList = new ArrayList<CommentEntity>();
-        mList.add(commentEntity);
         Log.i("list", "list:" + mList.size());
     }
 
@@ -95,29 +92,44 @@ public class MyListAdapter extends BaseAdapter {
         viewHolder.textView2.setText(entity.getLv());
         viewHolder.tvItemTime.setText(entity.getTvItemTime());
         viewHolder.tvItemComments.setText(entity.getTvItemComments());
+        switch (entity.getStartNums()){
+            case 5:
+                viewHolder.ivItemStart5.setVisibility(View.VISIBLE);
+            case 4:
+                viewHolder.ivItemStart4.setVisibility(View.VISIBLE);
+            case 3:
+                viewHolder.ivItemStart3.setVisibility(View.VISIBLE);
+            case 2:
+                viewHolder.ivItemStart2.setVisibility(View.VISIBLE);
+            case 1:
+                viewHolder.ivItemStart1.setVisibility(View.VISIBLE);
+                break;
+        }
         final ViewHolder finalViewHolder = viewHolder;
         final View finalConvertView = convertView;
         viewHolder.linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onClickLookMore(finalViewHolder,position);
+                onClickLookMore(finalViewHolder, position);
             }
         });
         viewHolder.tvItemComments.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onClickLookMore(finalViewHolder,position);
+                onClickLookMore(finalViewHolder, position);
             }
         });
-        /*if (position >= 1) {
+        if (position > 0 && MainActivity.instance.isMoreBool) {
             TranslateAnimation animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_PARENT, 1, Animation.RELATIVE_TO_SELF, 0);
             animation.setDuration(200 + position * 200);
 
             AnimationSet set = new AnimationSet(true);
             set.addAnimation(animation);
             convertView.startAnimation(set);
-        }*/
-        /*MainActivity.instance.ll_lv.addView(convertView);*/
+            if(position==mList.size()-1) {
+                MainActivity.instance.isMoreBool = false;
+            }
+        }
         return convertView;
     }
 
@@ -131,26 +143,21 @@ public class MyListAdapter extends BaseAdapter {
                 public void run() {
                     int lvH = MainActivity.instance.lvComment.getHeight();
                     int endHeight = finalViewHolder.tvItemComments.getHeight();
-                    int dx=endHeight-startHeight;
-                    int lvEnd = dx + lvH ;
-                   /* LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) MainActivity.instance.lvComment.getLayoutParams();
-                    layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
-                    layoutParams.height = lvEnd;
-                    MainActivity.instance.lvComment.setLayoutParams(layoutParams);
-                    MainActivity.instance.lvComment.notify();*/
-                    Intent intent = new Intent("myListAdapter");
+                    int dx = endHeight - startHeight;
+                    int lvEnd = dx + lvH;
+                    Intent intent = new Intent(Const.ACTION_LISTVIEW_CHANG);
                     intent.putExtra("key", lvEnd);
-                    if(getCount()!=1) {//全部显示
+                    if (getCount() != 1) {//全部显示
                         intent.putExtra("keyDown", lvEnd);
                         intent.putExtra("isAll", true);
-                        if(position==0){//第一个item
+                        if (position == 0) {//第一个item
                             intent.putExtra("keyUp",
-                                    dx+MainActivity.instance.heightUp);
+                                    dx + MainActivity.instance.heightUp);
                         }
-                    }else {//只用一个item
+                    } else {//只用一个item
                         intent.putExtra("keyUp", lvEnd);
                         intent.putExtra("isAll", false);
-                        intent.putExtra("keyDown", dx+MainActivity.instance.heightDown);
+                        intent.putExtra("keyDown", dx + MainActivity.instance.heightDown);
                         Log.i("height", "MainActivity.instance.heightDown:" + MainActivity.instance.heightDown);
                     }
                     MainActivity.instance.sendBroadcast(intent);
@@ -167,24 +174,19 @@ public class MyListAdapter extends BaseAdapter {
                 public void run() {
                     int lvH = MainActivity.instance.lvComment.getHeight();
                     int endHeight = finalViewHolder.tvItemComments.getHeight();
-                    int dx=endHeight-startHeight;
-                    int lvEnd = dx + lvH ;
-                   /* LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) MainActivity.instance.lvComment.getLayoutParams();
-                    layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
-                    layoutParams.height = lvEnd;
-                    MainActivity.instance.lvComment.setLayoutParams(layoutParams);
-                    MainActivity.instance.lvComment.notify();*/
-                    Intent intent = new Intent("myListAdapter");
-                    if(getCount()!=1) {//全部显示
+                    int dx = endHeight - startHeight;
+                    int lvEnd = dx + lvH;
+                    Intent intent = new Intent(Const.ACTION_LISTVIEW_CHANG);
+                    if (getCount() != 1) {//全部显示
                         intent.putExtra("keyDown", lvEnd);
                         intent.putExtra("isAll", true);
-                        if(position==0){//第一个item
+                        if (position == 0) {//第一个item
                             intent.putExtra("keyUp",
-                                    dx+MainActivity.instance.heightUp);
+                                    dx + MainActivity.instance.heightUp);
                         }
-                    }else {//只用一个item
+                    } else {//只用一个item
                         intent.putExtra("keyUp", lvEnd);
-                        intent.putExtra("keyDown", dx+MainActivity.instance.heightDown);
+                        intent.putExtra("keyDown", dx + MainActivity.instance.heightDown);
                         intent.putExtra("isAll", false);
                     }
                     MainActivity.instance.sendBroadcast(intent);

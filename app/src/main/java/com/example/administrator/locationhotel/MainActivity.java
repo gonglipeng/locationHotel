@@ -1,33 +1,39 @@
 package com.example.administrator.locationhotel;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextSwitcher;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
 
 import com.example.administrator.locationhotel.adapter.MyGridAdapter;
 import com.example.administrator.locationhotel.adapter.MyListAdapter;
 import com.example.administrator.locationhotel.entity.CommentEntity;
 import com.example.administrator.locationhotel.entity.LookEntity;
+import com.example.administrator.locationhotel.utils.Const;
 import com.example.administrator.locationhotel.utils.MyObjectAnimator;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener {
 
     private LinearLayout ll1;
     private LinearLayout llTime;
@@ -61,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public ListView lvComment;
     private TextView tvLook;
     private LinearLayout ll5;
-    private TextView tvMore;
+    private TextSwitcher tvMore;
     private GridView gvScenic;
     private ImageView ivQuery;
     private TextView tvWrite;
@@ -73,7 +79,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private ArrayList<CommentEntity> commentEntitys;
     private ArrayList<LookEntity> lookEntities;
-    public LinearLayout ll_lv;
 
     public static MainActivity instance;
     public myBroadcastReceiver mReceiver;
@@ -83,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public int heightUp;    //需要adapter调用计算第一个item
     public int heightDown;
     private boolean isFirst=true;
+    public boolean isMoreBool;
 
     private void assignViews() {
         ll1 = (LinearLayout) findViewById(R.id.ll_1);
@@ -117,13 +123,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         lvComment = (ListView) findViewById(R.id.lv_comment);
         tvLook = (TextView) findViewById(R.id.tv_look);
         ll5 = (LinearLayout) findViewById(R.id.ll_5);
-        tvMore = (TextView) findViewById(R.id.tv_more);
+        tvMore = (TextSwitcher) findViewById(R.id.tv_more);    //文本切换器
         gvScenic = (GridView) findViewById(R.id.gv_scenic);
         ivQuery = (ImageView) findViewById(R.id.iv_query);
         tvWrite = (TextView) findViewById(R.id.tv_write);
-        ll_lv = (LinearLayout) findViewById(R.id.ll_listview);
+
+        tvMore.setFactory(mFactory);
+
+        /*
+         * Set the in and out animations. Using the fade_in/out animations
+         * provided by the framework.
+         */
+        Animation in = AnimationUtils.loadAnimation(this,
+                android.R.anim.fade_in);
+        Animation out = AnimationUtils.loadAnimation(this,
+                android.R.anim.fade_out);
+        tvMore.setInAnimation(in);
+        tvMore.setOutAnimation(out);
+        tvMore.setCurrentText("查看更多");
     }
 
+    private ViewSwitcher.ViewFactory mFactory = new ViewSwitcher.ViewFactory() {
+
+        @Override
+        public View makeView() {
+
+            // Create a new TextView
+            TextView t = new TextView(MainActivity.this);
+            t.setGravity(Gravity.TOP | Gravity.RIGHT);
+            t.setTextSize(10);
+            return t;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,21 +168,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         lvComment.setAdapter(myListAdapter);
         myGridAdapter = new MyGridAdapter(this, lookEntities);
         gvScenic.setAdapter(myGridAdapter);
-        /*new Thread() {
-            @Override
-            public void run() {
-                if (lookEntities.size() > 4) {
-                    lookEntities1 = new ArrayList<>();
-                    for (int i = 0; i < 4; i++) {
-                        lookEntities1.add(lookEntities.get(i));
-                    }
-                    myGridAdapter = new MyGridAdapter(MainActivity.this, lookEntities1);
-                    myGridAdapter.notifyDataSetChanged();
-                    gvScenic.setAdapter(myGridAdapter);
-                    moreBool = true;
-                }
-            }
-        }.start();*/
         //根据评论人数重新赋值
         tvDianping.post(new Runnable() {
             @Override
@@ -180,8 +196,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void run() {
                 startLineLvHeight = lvComment.getHeight();
                 if(isFirst){
-                    heightUp=startLineLvHeight;
-                    heightDown=startLineLvHeight*9;
+                    heightUp=startLineLvHeight;    //初始化只有一栏的高度
+                    heightDown=startLineLvHeight*commentEntitys.size();    //初始化全部显示高度
                     Log.i("heightDown", ""+heightDown);
                     isFirst=false;
                 }
@@ -198,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         mReceiver = new myBroadcastReceiver();
-        IntentFilter filter = new IntentFilter("myListAdapter");
+        IntentFilter filter = new IntentFilter(Const.ACTION_LISTVIEW_CHANG);
         this.registerReceiver(mReceiver, filter);
     }
 
@@ -206,13 +222,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         commentEntitys = new ArrayList<>();
         commentEntitys.add(new CommentEntity(R.drawable.pic1, "张三", "lv3", "2016-03-02", 3, "展啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦了啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是vchdbshjfg"));
         commentEntitys.add(new CommentEntity(R.drawable.pic2, "张三", "lv2", "2016-03-02", 2, "展示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是vchdbshjfg"));
-        commentEntitys.add(new CommentEntity(R.drawable.pic1, "张三", "lv3", "2016-03-02", 3, "展示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是vchdbshjfg"));
+        commentEntitys.add(new CommentEntity(R.drawable.pic1, "张三", "lv3", "2016-03-02", 1, "展示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是vchdbshjfg"));
         commentEntitys.add(new CommentEntity(R.drawable.pic1, "张三", "lv3", "2016-03-02", 3, "展示柜的哈巴萨和姐夫吧唧的杀菌客户的展啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦了啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是vchdbshjfg数据库萨比开车不能下上班的飞机公司价格赋予的还是vchdbshjfg"));
-        commentEntitys.add(new CommentEntity(R.drawable.pic1, "张三", "lv3", "2016-03-02", 3, "展示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是vchdbshjfg"));
-        commentEntitys.add(new CommentEntity(R.drawable.pic1, "张三", "lv3", "2016-03-02", 3, "展示柜展啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦了啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还车不能下上班的飞机公司价格是vchdbshjfg"));
-        commentEntitys.add(new CommentEntity(R.drawable.pic1, "张三", "lv3", "2016-03-02", 3, "展示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是vchdbshjfg"));
-        commentEntitys.add(new CommentEntity(R.drawable.pic1, "张三", "lv3", "2016-03-02", 3, "展示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是vchdbshjfg"));
-        commentEntitys.add(new CommentEntity(R.drawable.pic1, "张三", "lv3", "2016-03-02", 3, "展示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是vchdbshjfg"));
+        commentEntitys.add(new CommentEntity(R.drawable.pic1, "张三", "lv3", "2016-03-02", 4, "展示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是vchdbshjfg"));
+        commentEntitys.add(new CommentEntity(R.drawable.pic1, "张三", "lv3", "2016-03-02", 2, "展示柜展啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦了啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦啦示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还车不能下上班的飞机公司价格是vchdbshjfg"));
+        commentEntitys.add(new CommentEntity(R.drawable.pic1, "张三", "lv3", "2016-03-02", 5, "展示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是vchdbshjfg"));
+        commentEntitys.add(new CommentEntity(R.drawable.pic1, "张三", "lv3", "2016-03-02", 1, "展示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是vchdbshjfg"));
+        commentEntitys.add(new CommentEntity(R.drawable.pic1, "张三", "lv3", "2016-03-02", 0, "展示柜的哈巴萨和姐夫吧唧的杀菌客户的数据库萨比开车不能下上班的飞机公司价格赋予的还是vchdbshjfg"));
         lookEntities = new ArrayList<>();
         lookEntities.add(new LookEntity((R.drawable.pic2), "2km", "塞纳河畔"));
         lookEntities.add(new LookEntity((R.drawable.pic2), "2km", "塞纳河畔"));
@@ -233,7 +249,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         lookEntities.add(new LookEntity((R.drawable.pic2), "2km", "塞纳河畔"));
         lookEntities.add(new LookEntity((R.drawable.pic2), "2km", "塞纳河畔"));
         lookEntities.add(new LookEntity((R.drawable.pic2), "2km", "塞纳河畔"));
-
     }
 
 
@@ -252,15 +267,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.iv_scenic_down://地图上面的小按钮
                 if (tvScenic.getLineCount() == 4) {    //行数
-                   /* ScaleAnimation animation=new ScaleAnimation(1,1,0,1, Animation.RELATIVE_TO_SELF,0,Animation.RELATIVE_TO_SELF,4/lineScenic);
-                    animation.setDuration(1000);
-                    tvScenic.startAnimation(animation);*/
                     down(ivScenicDown, tvScenic, 4);
                 } else if (tvScenic.getLineCount() > 4) {
-                    /*RotateAnimation rotateAnimation = new RotateAnimation(180, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-                    rotateAnimation.setDuration(1000);
-                    rotateAnimation.setFillAfter(true);
-                    ivScenicDown.startAnimation(rotateAnimation);*/
                     MyObjectAnimator.rotationX2(ivScenicDown);
                     tvScenic.setMaxLines(4);
                 }
@@ -298,13 +306,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     lvComment.post(new Runnable() {
                         @Override
                         public void run() {
-                            if (heightDown != 0) {
+                            if (heightDown != 0) {//改变后
+                                isMoreBool=true;
                                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) lvComment.getLayoutParams();
                                 params.height = heightDown;
                                 params.weight = LinearLayout.LayoutParams.MATCH_PARENT;
                                 lvComment.setLayoutParams(params);
                                 Log.i("height", lvComment.getHeight() + "mLayoutParamsDown");
-                            } else {
+                            } else {//初始高度参数
                                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) lvComment.getLayoutParams();
                                 params.height = startLineLvHeight * myListAdapter.size;
                                 params.weight = LinearLayout.LayoutParams.MATCH_PARENT;
@@ -324,14 +333,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     lvComment.post(new Runnable() {
                         @Override
                         public void run() {
-                            if (heightUp != 0) {
+                            if (heightUp != 0) {//改变后
                                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) lvComment.getLayoutParams();
                                 params.height = heightUp;
                                 params.weight = LinearLayout.LayoutParams.MATCH_PARENT;
                                 lvComment.setLayoutParams(params);
-                                lvComment.setLayoutParams(params);
                                 Log.i("height", lvComment.getHeight() + "mLayoutParamsUp");
-                            } else {
+                            } else {//初始高度参数
                                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) lvComment.getLayoutParams();
                                 params.height = startLineLvHeight / myListAdapter.size;
                                 params.weight = LinearLayout.LayoutParams.MATCH_PARENT;
@@ -353,6 +361,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     tvMore.setText("查看更多");
                     moreBool = true;
                 }
+                break;
+            case R.id.tv_write://写评论
+
+                break;
+            case R.id.iv_apply_down://预定
+
                 break;
         }
     }

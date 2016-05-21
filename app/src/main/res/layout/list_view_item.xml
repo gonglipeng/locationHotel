@@ -56,7 +56,9 @@
         android:layout_alignStart="@+id/tv_item_user"
         android:layout_below="@+id/tv_item_user"
         android:layout_marginRight="3dp"
-        android:src="@drawable/star_s" />
+        android:src="@drawable/star_s"
+        android:visibility="gone"
+        />
 
     <ImageView
         android:id="@+id/iv_item_start_2"
@@ -65,7 +67,8 @@
         android:layout_alignTop="@+id/iv_item_start_1"
         android:layout_marginRight="3dp"
         android:layout_toEndOf="@+id/iv_item_start_1"
-        android:src="@drawable/star_s" />
+        android:src="@drawable/star_s"
+        android:visibility="gone"/>
 
     <ImageView
         android:id="@+id/iv_item_start_3"
@@ -74,7 +77,8 @@
         android:layout_alignTop="@+id/iv_item_start_2"
         android:layout_marginRight="3dp"
         android:layout_toEndOf="@+id/iv_item_start_2"
-        android:src="@drawable/star_s" />
+        android:src="@drawable/star_s"
+        android:visibility="gone"/>
 
     <ImageView
         android:id="@+id/iv_item_start_4"
@@ -83,7 +87,9 @@
         android:layout_alignTop="@+id/iv_item_start_3"
         android:layout_marginRight="3dp"
         android:layout_toEndOf="@+id/iv_item_start_3"
-        android:src="@drawable/star_s" />
+        android:src="@drawable/star_s"
+        android:visibility="gone"
+        />
 
     <ImageView
         android:id="@+id/iv_item_start_5"
@@ -92,7 +98,9 @@
         android:layout_alignTop="@+id/iv_item_start_4"
         android:layout_marginRight="3dp"
         android:layout_toEndOf="@+id/iv_item_start_4"
-        android:src="@drawable/star_s" />
+        android:src="@drawable/star_s"
+        android:visibility="gone"
+        />
 
     <TextView
         android:id="@+id/tv_item_comments"
